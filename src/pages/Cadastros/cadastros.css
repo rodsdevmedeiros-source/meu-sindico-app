@@ -76,8 +76,14 @@
   font-weight: 600;
 }
 
-.cadastro-form__submit {
+.cadastro-form__acoes {
+  display: flex;
+  gap: 10px;
   margin-top: 4px;
+}
+
+.cadastro-form__submit {
+  flex: 1;
   padding: 12px;
   border: none;
   border-radius: var(--radius-md);
@@ -87,6 +93,26 @@
   font-weight: 700;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.cadastro-form__cancelar {
+  padding: 12px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.cadastro-form__cancelar:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+
+.cadastro-form__cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .cadastro-form__submit:hover:not(:disabled) {
@@ -150,4 +176,182 @@
 
 .cadastro-tabela__remover:hover {
   background: rgba(220, 38, 38, 0.1);
+}
+
+/* ---------- Lista de apartamentos (só o número) ---------- */
+.apto-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apto-lista__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.apto-lista__item:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.apto-lista__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apto-lista__icone {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: rgba(37, 99, 235, 0.1);
+  font-size: 1.2rem;
+}
+
+.apto-lista__rotulo {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.apto-lista__numero {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.apto-lista__acoes {
+  display: flex;
+  gap: 6px;
+}
+
+.apto-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 1rem;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.apto-btn:active {
+  transform: translateY(1px);
+}
+
+.apto-btn--ver:hover {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: var(--color-primary-light);
+}
+
+.apto-btn--editar:hover {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: #eab308;
+}
+
+.apto-btn--deletar:hover {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+}
+
+/* ---------- Modal de visualizacao ---------- */
+.apto-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.apto-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.apto-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.apto-modal__head h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.apto-modal__fechar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.apto-modal__fechar:hover {
+  background: var(--color-bg);
+}
+
+.apto-modal__dados {
+  margin: 0;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.apto-modal__dados dt {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.apto-modal__dados dd {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.apto-modal__footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.apto-modal__btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
 }

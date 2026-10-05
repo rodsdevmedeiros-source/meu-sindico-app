@@ -6,6 +6,8 @@ import {
   ANDARES,
   ANDAR_LABEL,
   BLOCOS,
+  BLOCO_LABEL,
+  atualizarApartamento,
   criarApartamento,
   listarApartamentos,
   removerApartamento,
@@ -23,7 +25,7 @@ const FORM_INICIAL = {
 }
 
 const opcoesAndar = ANDARES.map((a) => ({ value: a, label: ANDAR_LABEL[a] }))
-const opcoesBloco = BLOCOS.map((b) => ({ value: b, label: `Bloco ${b}` }))
+const opcoesBloco = BLOCOS.map((b) => ({ value: b, label: BLOCO_LABEL[b] }))
 
 /**
  * Pagina de cadastro de Apartamentos (Cadastros > Apartamentos).
@@ -37,6 +39,8 @@ function Apartamentos() {
   const [erroGeral, setErroGeral] = useState('')
   const [sucesso, setSucesso] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [detalhe, setDetalhe] = useState(null)
+  const [editandoId, setEditandoId] = useState(null) // null = modo criacao
 
   async function carregar() {
     setCarregando(true)
@@ -79,10 +83,19 @@ function Apartamentos() {
 
     setSalvando(true)
     try {
-      const novo = await criarApartamento(form)
-      setLista((atual) => [...atual, novo])
+      if (editandoId) {
+        const atualizado = await atualizarApartamento(editandoId, form)
+        setLista((atual) =>
+          atual.map((a) => (a.id === editandoId ? atualizado : a)),
+        )
+        setSucesso('Apartamento atualizado com sucesso!')
+      } else {
+        const novo = await criarApartamento(form)
+        setLista((atual) => [...atual, novo])
+        setSucesso('Apartamento cadastrado com sucesso!')
+      }
       setForm(FORM_INICIAL)
-      setSucesso('Apartamento cadastrado com sucesso!')
+      setEditandoId(null)
     } catch (err) {
       setErroGeral(err.message)
     } finally {
@@ -90,9 +103,39 @@ function Apartamentos() {
     }
   }
 
+  function cancelarEdicao() {
+    setForm(FORM_INICIAL)
+    setEditandoId(null)
+    setErros({})
+    setErroGeral('')
+    setSucesso('')
+  }
+
   async function handleRemover(id) {
     await removerApartamento(id)
     setLista((atual) => atual.filter((a) => a.id !== id))
+  }
+
+  function handleVisualizar(apto) {
+    setDetalhe(apto)
+  }
+
+  function handleEditar(apto) {
+    // Carrega os dados no formulario e entra em modo de edicao.
+    setForm({
+      numero: String(apto.numero ?? ''),
+      andar: apto.andar ?? '',
+      bloco: apto.bloco ?? '',
+      qtdVagasGaragem: String(apto.qtdVagasGaragem ?? ''),
+      qtdQuartos: apto.qtdQuartos != null ? String(apto.qtdQuartos) : '',
+      qtdSalas: apto.qtdSalas != null ? String(apto.qtdSalas) : '',
+      qtdSuites: apto.qtdSuites != null ? String(apto.qtdSuites) : '',
+    })
+    setEditandoId(apto.id)
+    setErros({})
+    setErroGeral('')
+    setSucesso('')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -107,7 +150,7 @@ function Apartamentos() {
 
       <div className="cadastro-page__grid">
         {/* Formulario */}
-        <Card titulo="Novo apartamento">
+        <Card titulo={editandoId ? 'Editar apartamento' : 'Novo apartamento'}>
           <form className="cadastro-form" onSubmit={handleSubmit} noValidate>
             {erroGeral && <div className="cadastro-form__erro">{erroGeral}</div>}
             {sucesso && <div className="cadastro-form__sucesso">{sucesso}</div>}
@@ -173,13 +216,29 @@ function Apartamentos() {
               />
             </div>
 
-            <button
-              className="cadastro-form__submit"
-              type="submit"
-              disabled={salvando}
-            >
-              {salvando ? 'Salvando...' : 'Cadastrar apartamento'}
-            </button>
+            <div className="cadastro-form__acoes">
+              {editandoId && (
+                <button
+                  className="cadastro-form__cancelar"
+                  type="button"
+                  onClick={cancelarEdicao}
+                  disabled={salvando}
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                className="cadastro-form__submit"
+                type="submit"
+                disabled={salvando}
+              >
+                {salvando
+                  ? 'Salvando...'
+                  : editandoId
+                    ? 'Salvar alterações'
+                    : 'Cadastrar apartamento'}
+              </button>
+            </div>
           </form>
         </Card>
 
@@ -192,49 +251,141 @@ function Apartamentos() {
               Nenhum apartamento cadastrado ainda.
             </p>
           ) : (
-            <div className="cadastro-tabela-wrap">
-              <table className="cadastro-tabela">
-                <thead>
-                  <tr>
-                    <th>Unidade</th>
-                    <th>Andar</th>
-                    <th>Garagem</th>
-                    <th>Quartos</th>
-                    <th>Suítes</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lista.map((apto) => (
-                    <tr key={apto.id}>
-                      <td>
-                        <strong>
-                          {apto.numero}
-                          {apto.bloco ? ` · Bloco ${apto.bloco}` : ''}
-                        </strong>
-                      </td>
-                      <td>{ANDAR_LABEL[apto.andar] || apto.andar}</td>
-                      <td>{apto.qtdVagasGaragem}</td>
-                      <td>{apto.qtdQuartos ?? '-'}</td>
-                      <td>{apto.qtdSuites ?? '-'}</td>
-                      <td>
-                        <button
-                          className="cadastro-tabela__remover"
-                          type="button"
-                          onClick={() => handleRemover(apto.id)}
-                          aria-label="Remover apartamento"
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ul className="apto-lista">
+              {lista.map((apto) => (
+                <li className="apto-lista__item" key={apto.id}>
+                  <div className="apto-lista__info">
+                    <span className="apto-lista__icone" aria-hidden="true">
+                      🚪
+                    </span>
+                    <div>
+                      <small className="apto-lista__rotulo">Apartamento</small>
+                      <strong className="apto-lista__numero">
+                        {apto.numero}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="apto-lista__acoes">
+                    <button
+                      className="apto-btn apto-btn--ver"
+                      type="button"
+                      onClick={() => handleVisualizar(apto)}
+                      aria-label={`Visualizar apartamento ${apto.numero}`}
+                      title="Visualizar"
+                    >
+                      👁️
+                    </button>
+                    <button
+                      className="apto-btn apto-btn--editar"
+                      type="button"
+                      onClick={() => handleEditar(apto)}
+                      aria-label={`Editar apartamento ${apto.numero}`}
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="apto-btn apto-btn--deletar"
+                      type="button"
+                      onClick={() => handleRemover(apto.id)}
+                      aria-label={`Deletar apartamento ${apto.numero}`}
+                      title="Deletar"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </Card>
       </div>
+
+      {/* Modal de visualizacao */}
+      {detalhe && (
+        <div
+          className="apto-modal__overlay"
+          onClick={() => setDetalhe(null)}
+          role="presentation"
+        >
+          <div
+            className="apto-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Detalhes do apartamento ${detalhe.numero}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="apto-modal__head">
+              <h3>Apartamento {detalhe.numero}</h3>
+              <button
+                className="apto-modal__fechar"
+                type="button"
+                onClick={() => setDetalhe(null)}
+                aria-label="Fechar"
+              >
+                ✕
+              </button>
+            </header>
+
+            <dl className="apto-modal__dados">
+              <div>
+                <dt>Número</dt>
+                <dd>{detalhe.numero}</dd>
+              </div>
+              <div>
+                <dt>Andar</dt>
+                <dd>{ANDAR_LABEL[detalhe.andar] || detalhe.andar}</dd>
+              </div>
+              <div>
+                <dt>Bloco</dt>
+                <dd>
+                  {detalhe.bloco
+                    ? BLOCO_LABEL[detalhe.bloco] || detalhe.bloco
+                    : '—'}
+                </dd>
+              </div>
+              <div>
+                <dt>Vagas de garagem</dt>
+                <dd>{detalhe.qtdVagasGaragem}</dd>
+              </div>
+              <div>
+                <dt>Quartos</dt>
+                <dd>{detalhe.qtdQuartos ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Salas</dt>
+                <dd>{detalhe.qtdSalas ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Suítes</dt>
+                <dd>{detalhe.qtdSuites ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Cadastrado em</dt>
+                <dd>
+                  {detalhe.dataCadastro
+                    ? new Date(detalhe.dataCadastro).toLocaleString('pt-BR')
+                    : '—'}
+                </dd>
+              </div>
+            </dl>
+
+            <footer className="apto-modal__footer">
+              <button
+                className="apto-modal__btn"
+                type="button"
+                onClick={() => {
+                  handleEditar(detalhe)
+                  setDetalhe(null)
+                }}
+              >
+                Editar
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

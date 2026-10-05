@@ -1,9 +1,9 @@
 /**
- * Service de Apartamentos (MOCKADO).
+ * Service de Apartamentos.
  *
- * Persiste os apartamentos no localStorage e simula latencia de rede.
- * As assinaturas espelham um CRUD de API para facilitar a troca por
- * chamadas HTTP reais no futuro.
+ * Fala apenas com o `apiClient` (camada central), nunca diretamente com
+ * o localStorage. Isso permite trocar o mock pelo backend real sem
+ * alterar as paginas: basta definir VITE_API_URL (ver apiClient.js).
  *
  * Modelo (espelha a entidade do backend):
  * {
@@ -14,11 +14,14 @@
  *   bloco: Bloco,             // enum (STRING) opcional
  *   qtdQuartos: number,       // opcional
  *   qtdSalas: number,         // opcional
- *   qtdSuites: number         // opcional
+ *   qtdSuites: number,        // opcional
+ *   dataCadastro: string      // ISO, preenchido pelo backend
  * }
  */
 
-const STORAGE_KEY = 'msa:apartamentos'
+import { api } from './apiClient.js'
+
+const RESOURCE = 'apartamentos'
 
 /** Valores possiveis para o enum Andar (STRING no backend). */
 export const ANDARES = [
@@ -53,42 +56,42 @@ export const ANDAR_LABEL = {
 }
 
 /** Valores possiveis para o enum Bloco (STRING no backend). */
-export const BLOCOS = ['A', 'B', 'C', 'D', 'E', 'F']
+export const BLOCOS = ['BLOCO_A', 'BLOCO_B', 'BLOCO_C', 'BLOCO_D', 'BLOCO_E', 'BLOCO_F']
 
-/** Gera um UUID v4 (usa a API nativa quando disponivel). */
-function gerarId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
+/** Rotulos amigaveis para exibicao do enum Bloco. */
+export const BLOCO_LABEL = {
+  BLOCO_A: 'Bloco A',
+  BLOCO_B: 'Bloco B',
+  BLOCO_C: 'Bloco C',
+  BLOCO_D: 'Bloco D',
+  BLOCO_E: 'Bloco E',
+  BLOCO_F: 'Bloco F',
 }
 
-/** Simula latencia de rede. */
-function delay(ms = 500) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+/** Registros iniciais (seed) usados apenas no modo mock. */
+const SEED = [
+  {
+    id: 'e8ec296a-bd51-47de-a5ff-e2d6195f7d92',
+    qtdVagasGaragem: 2,
+    andar: 'PRIMEIRO',
+    numero: 101,
+    bloco: 'BLOCO_A',
+    qtdQuartos: 3,
+    qtdSalas: 1,
+    qtdSuites: 1,
+    dataCadastro: '2026-10-05T13:49:00.223625',
+  },
+]
 
-/** Le a lista de apartamentos do localStorage. */
-function ler() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
+/** Opcoes extras repassadas ao apiClient (seed e ignorado no modo HTTP). */
+const OPCOES = { seed: SEED }
 
-/** Grava a lista de apartamentos no localStorage. */
-function salvar(lista) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(lista))
-}
-
-/** Converte os campos numericos vindos do formulario. */
-function normalizar(dados) {
+/**
+ * Monta o payload no formato esperado pelo backend, convertendo os
+ * campos numericos e normalizando os opcionais vazios para null.
+ * @param {object} dados dados crus vindos do formulario
+ */
+function montarPayload(dados) {
   const paraInt = (v) =>
     v === '' || v === null || v === undefined ? null : Number(v)
 
@@ -104,35 +107,63 @@ function normalizar(dados) {
 }
 
 /**
- * Lista todos os apartamentos cadastrados.
- * @returns {Promise<Array>}
+ * Garante que nao exista outro apartamento com mesmo numero + bloco.
+ * @param {Array}  lista     apartamentos existentes
+ * @param {object} payload   dados sendo gravados
+ * @param {string} [ignoreId] id a ignorar (usado na edicao)
  */
-export async function listarApartamentos() {
-  await delay()
-  return ler()
-}
-
-/**
- * Cria um novo apartamento.
- * @param {object} dados
- * @returns {Promise<object>}
- */
-export async function criarApartamento(dados) {
-  await delay()
-  const lista = ler()
-  const normalizado = normalizar(dados)
-
+function garantirUnico(lista, payload, ignoreId) {
   const duplicado = lista.some(
-    (a) => a.numero === normalizado.numero && a.bloco === normalizado.bloco,
+    (a) =>
+      a.id !== ignoreId &&
+      a.numero === payload.numero &&
+      a.bloco === payload.bloco,
   )
   if (duplicado) {
     throw new Error('Já existe um apartamento com este número e bloco.')
   }
+}
 
-  const novo = { id: gerarId(), ...normalizado }
-  lista.push(novo)
-  salvar(lista)
-  return novo
+/**
+ * Lista todos os apartamentos.
+ * @returns {Promise<Array>}
+ */
+export function listarApartamentos() {
+  return api.list(RESOURCE, OPCOES)
+}
+
+/**
+ * Busca um apartamento pelo id.
+ * @param {string} id
+ * @returns {Promise<object|null>}
+ */
+export function buscarApartamento(id) {
+  return api.get(RESOURCE, id, OPCOES)
+}
+
+/**
+ * Cria um novo apartamento.
+ * @param {object} dados dados do formulario
+ * @returns {Promise<object>}
+ */
+export async function criarApartamento(dados) {
+  const payload = montarPayload(dados)
+  const existentes = await api.list(RESOURCE, OPCOES)
+  garantirUnico(existentes, payload)
+  return api.create(RESOURCE, payload, OPCOES)
+}
+
+/**
+ * Atualiza um apartamento existente.
+ * @param {string} id    id do apartamento
+ * @param {object} dados dados do formulario
+ * @returns {Promise<object>}
+ */
+export async function atualizarApartamento(id, dados) {
+  const payload = montarPayload(dados)
+  const existentes = await api.list(RESOURCE, OPCOES)
+  garantirUnico(existentes, payload, id)
+  return api.update(RESOURCE, id, payload, OPCOES)
 }
 
 /**
@@ -140,8 +171,6 @@ export async function criarApartamento(dados) {
  * @param {string} id
  * @returns {Promise<void>}
  */
-export async function removerApartamento(id) {
-  await delay(300)
-  const lista = ler().filter((a) => a.id !== id)
-  salvar(lista)
+export function removerApartamento(id) {
+  return api.remove(RESOURCE, id, OPCOES)
 }
