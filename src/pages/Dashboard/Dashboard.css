@@ -1,0 +1,228 @@
+.dashboard__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.dashboard__header h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.dashboard__header p {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.dashboard__cta {
+  padding: 11px 18px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease;
+}
+
+.dashboard__cta:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Estatisticas */
+.dashboard__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+/* Grid principal */
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .dashboard__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Timeline de atividades */
+.dashboard__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard__timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard__timeline-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard__timeline-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.dashboard__timeline-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__timeline-body span {
+  font-size: 0.92rem;
+}
+
+.dashboard__timeline-body small {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+/* Listas (inadimplencia / reservas) */
+.dashboard__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard__lista-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard__lista-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard__lista-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.dashboard__lista-item small {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.dashboard__lista-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* Tags */
+.dashboard__tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dashboard__tag--ok {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+.dashboard__tag--pendente {
+  background: rgba(234, 179, 8, 0.15);
+  color: #a16207;
+}
+
+.dashboard__tag--alerta {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.dashboard__valor-vermelho {
+  color: #dc2626;
+}
+
+.dashboard__valor-verde {
+  color: #16a34a;
+}
+
+/* Resumo financeiro */
+.dashboard__finance {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard__finance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.92rem;
+}
+
+.dashboard__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.dashboard__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.dashboard__bar-fill--verde {
+  background: #16a34a;
+}
+
+.dashboard__bar-fill--vermelho {
+  background: #dc2626;
+}
+
+.dashboard__saldo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.dashboard__saldo span {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.dashboard__saldo strong {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}

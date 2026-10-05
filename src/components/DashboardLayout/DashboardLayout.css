@@ -1,0 +1,123 @@
+.dashboard-layout {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.dashboard-layout__main {
+  margin-left: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Topbar */
+.dashboard-layout__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 68px;
+  padding: 0 28px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard-layout__menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: var(--color-text);
+}
+
+.dashboard-layout__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 420px;
+  padding: 9px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+
+.dashboard-layout__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.dashboard-layout__topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-layout__icon-btn {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+}
+
+.dashboard-layout__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.dashboard-layout__avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Conteudo */
+.dashboard-layout__content {
+  flex: 1;
+  padding: 28px;
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  .dashboard-layout__main {
+    margin-left: 0;
+  }
+
+  .dashboard-layout__menu-btn {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout__search {
+    display: none;
+  }
+
+  .dashboard-layout__content {
+    padding: 18px;
+  }
+}
