@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import Login from './pages/Auth/Login.jsx'
 import Cadastro from './pages/Auth/Cadastro.jsx'
 import Apartamentos from './pages/Cadastros/Apartamentos.jsx'
+import Funcionarios from './pages/Cadastros/Funcionarios.jsx'
 import './styles/global.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/area-do-sindico" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="cadastros/apartamentos" element={<Apartamentos />} />
+          <Route path="cadastros/funcionarios" element={<Funcionarios />} />
         </Route>
       </Routes>
     </BrowserRouter>
